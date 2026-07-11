@@ -2,11 +2,13 @@ from flask import Flask
 from flask_cors import CORS
 from services.supabase_client import supabase
 from routes.upload import upload_bp
+from routes.review import review_bp
 
 app = Flask(__name__)
 CORS(app)
 
 app.register_blueprint(upload_bp)
+app.register_blueprint(review_bp)
 
 @app.route("/")
 def home():
