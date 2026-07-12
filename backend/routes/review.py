@@ -1,6 +1,8 @@
 import os
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify
 from services.pylint_service import run_pylint
+from services.bandit_service import run_bandit
+from services.radon_service import run_radon
 
 review_bp = Blueprint("review", __name__)
 
@@ -14,8 +16,12 @@ def review_file(filename):
         return jsonify({"error": "File not found"}), 404
 
     pylint_result = run_pylint(filepath)
+    bandit_result = run_bandit(filepath)
+    radon_result = run_radon(filepath)
 
     return jsonify({
         "filename": filename,
-        "pylint": pylint_result
+        "pylint": pylint_result,
+        "bandit": bandit_result,
+        "radon": radon_result
     }), 200
