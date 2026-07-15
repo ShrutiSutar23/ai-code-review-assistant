@@ -100,6 +100,36 @@ function ReportPage() {
               </p>
             ))}
           </div>
+
+          {/* AI Review Section */}
+          {report.ai_review && !report.ai_review.error && (
+            <div style={cardStyle}>
+              <h3>AI Code Review (Gemini)</h3>
+
+              <p style={{ fontSize: "18px" }}>
+                <strong>Quality Score:</strong>{" "}
+                <span style={{ color: scoreColor(report.ai_review.quality_score) }}>
+                  {report.ai_review.quality_score} / 100
+                </span>
+              </p>
+
+              <p><strong>Summary:</strong> {report.ai_review.summary}</p>
+
+              <ReviewList title="🐞 Bugs" items={report.ai_review.bugs} color="red" />
+              <ReviewList title="🔒 Security Issues" items={report.ai_review.security_issues} color="red" />
+              <ReviewList title="👃 Code Smells" items={report.ai_review.code_smells} color="orange" />
+              <ReviewList title="⚡ Performance Improvements" items={report.ai_review.performance_improvements} color="#0077cc" />
+              <ReviewList title="✅ Best Practices" items={report.ai_review.best_practices} color="green" />
+              <ReviewList title="🔧 Refactoring Suggestions" items={report.ai_review.refactoring_suggestions} color="#0077cc" />
+            </div>
+          )}
+
+          {report.ai_review && report.ai_review.error && (
+            <div style={cardStyle}>
+              <h3>AI Code Review</h3>
+              <p style={{ color: "red" }}>AI review failed: {report.ai_review.error}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -118,6 +148,29 @@ function severityColor(severity) {
   if (severity === "HIGH") return "red";
   if (severity === "MEDIUM") return "orange";
   return "#555";
+}
+
+function ReviewList({ title, items, color }) {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <div style={{ marginTop: "12px" }}>
+      <h4 style={{ marginBottom: "6px" }}>{title}</h4>
+      <ul>
+        {items.map((item, i) => (
+          <li key={i} style={{ color, marginBottom: "4px" }}>
+            {typeof item === "string" ? item : JSON.stringify(item)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function scoreColor(score) {
+  if (score >= 80) return "green";
+  if (score >= 50) return "orange";
+  return "red";
 }
 
 export default ReportPage;
