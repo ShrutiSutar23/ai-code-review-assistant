@@ -101,6 +101,17 @@ function ReportPage() {
             ))}
           </div>
 
+          {/* Metrics Section */}
+          {report.metrics && !report.metrics.error && (
+            <div style={cardStyle}>
+              <h3>Code Metrics</h3>
+              <p><strong>Classes:</strong> {report.metrics.num_classes}</p>
+              <p><strong>Functions:</strong> {report.metrics.num_functions}</p>
+              <p><strong>Total Lines of Code:</strong> {report.metrics.total_lines}</p>
+              <p><strong>Average Function Length:</strong> {report.metrics.avg_function_length} lines</p>
+            </div>
+          )}
+
           {/* AI Review Section */}
           {report.ai_review && !report.ai_review.error && (
             <div style={cardStyle}>

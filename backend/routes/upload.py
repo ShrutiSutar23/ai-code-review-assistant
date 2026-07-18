@@ -29,3 +29,22 @@ def upload_file():
     file.save(save_path)
 
     return jsonify({"message": "File uploaded successfully", "filename": file.filename}), 200
+
+
+@upload_bp.route("/upload/snippet", methods=["POST"])
+def upload_snippet():
+    data = request.get_json()
+    code = data.get("code")
+    filename = data.get("filename", "snippet.py")
+
+    if not code:
+        return jsonify({"error": "No code provided"}), 400
+
+    if not is_allowed(filename):
+        return jsonify({"error": "File type not supported"}), 400
+
+    save_path = os.path.join(UPLOAD_FOLDER, filename)
+    with open(save_path, "w", encoding="utf-8") as f:
+        f.write(code)
+
+    return jsonify({"message": "Snippet saved successfully", "filename": filename}), 200

@@ -4,6 +4,8 @@ import UploadPage from "./pages/UploadPage";
 import ReportPage from "./pages/ReportPage";
 import DocumentationPage from "./pages/DocumentationPage";
 import HistoryPage from "./pages/HistoryPage";
+import AuthPage from "./pages/AuthPage";
+import PasteCodePage from "./pages/PasteCodePage";
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
         <Route path="/report" element={<ReportPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="/history" element={<HistoryPage />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/paste" element={<PasteCodePage />} />
       </Routes>
     </BrowserRouter>
   );
