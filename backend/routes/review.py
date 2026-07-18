@@ -4,6 +4,7 @@ from services.pylint_service import run_pylint
 from services.bandit_service import run_bandit
 from services.radon_service import run_radon
 from services.openai_service import run_ai_review
+from services.supabase_client import supabase
 
 review_bp = Blueprint("review", __name__)
 
@@ -24,6 +25,27 @@ def review_file(filename):
         code_content = f.read()
 
     ai_result = run_ai_review(code_content)
+
+    # Save to Supabase (best-effort — won't crash the app if it fails)
+    try:
+        project_insert = supabase.table("projects").insert({
+            "project_name": filename,
+            "upload_type": "file"
+        }).execute()
+
+        project_id = project_insert.data[0]["id"]
+
+        score = ai_result.get("quality_score", 0) if isinstance(ai_result, dict) else 0
+        summary = ai_result.get("summary", "") if isinstance(ai_result, dict) else ""
+
+        supabase.table("reviews").insert({
+            "project_id": project_id,
+            "review_score": score,
+            "summary": summary
+        }).execute()
+
+    except Exception as e:
+        print("Supabase save failed:", e)
 
     return jsonify({
         "filename": filename,

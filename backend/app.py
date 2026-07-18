@@ -4,6 +4,7 @@ from services.supabase_client import supabase
 from routes.upload import upload_bp
 from routes.review import review_bp
 from routes.documentation import documentation_bp
+from routes.history import history_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -11,6 +12,7 @@ CORS(app)
 app.register_blueprint(upload_bp)
 app.register_blueprint(review_bp)
 app.register_blueprint(documentation_bp)
+app.register_blueprint(history_bp)
 
 @app.route("/")
 def home():

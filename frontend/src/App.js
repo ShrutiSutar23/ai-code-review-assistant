@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard";
 import UploadPage from "./pages/UploadPage";
 import ReportPage from "./pages/ReportPage";
 import DocumentationPage from "./pages/DocumentationPage";
+import HistoryPage from "./pages/HistoryPage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/report" element={<ReportPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
+        <Route path="/history" element={<HistoryPage />} />
       </Routes>
     </BrowserRouter>
   );
