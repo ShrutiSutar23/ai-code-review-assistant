@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import { fonts } from "../theme";
+import { useTheme } from "../context/ThemeContext";
+import PageHeader from "../components/PageHeader";
 
 function HistoryPage() {
+  const { colors } = useTheme();
   const [history, setHistory] = useState([]);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
@@ -34,64 +39,99 @@ function HistoryPage() {
     }
   };
 
+  const scoreColor = (score) => {
+    if (score >= 80) return colors.green;
+    if (score >= 50) return colors.amber;
+    return colors.red;
+  };
+
   return (
-    <div style={{ padding: "40px", maxWidth: "800px", margin: "0 auto" }}>
-      <h1>Review History</h1>
+    <div style={{ minHeight: "100vh", backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
+      <div style={styles.content}>
+        <PageHeader eyebrow="~/history" title="Review History" subtitle="Search, filter, and revisit past reviews." />
 
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="Search by project name"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ padding: "8px", marginRight: "10px", width: "200px" }}
-        />
-        <input
-          type="number"
-          placeholder="Min score"
-          value={minScore}
-          onChange={(e) => setMinScore(e.target.value)}
-          style={{ padding: "8px", marginRight: "10px", width: "100px" }}
-        />
-        <input
-          type="number"
-          placeholder="Max score"
-          value={maxScore}
-          onChange={(e) => setMaxScore(e.target.value)}
-          style={{ padding: "8px", marginRight: "10px", width: "100px" }}
-        />
-        <button onClick={fetchHistory} style={{ padding: "8px 16px" }}>
-          Filter
-        </button>
-      </div>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {history.length === 0 && !error && <p>No reviews found.</p>}
-
-      {history.map((item) => (
-        <div key={item.review_id} style={cardStyle}>
-          <h3>{item.project_name}</h3>
-          <p><strong>Score:</strong> {item.review_score} / 100</p>
-          <p>{item.summary}</p>
-          <p style={{ fontSize: "12px", color: "#888" }}>{new Date(item.created_at).toLocaleString()}</p>
-          <button
-            onClick={() => handleDelete(item.review_id)}
-            style={{ padding: "6px 12px", backgroundColor: "#e63946", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
-          >
-            Delete
-          </button>
+        <div style={styles.filterRow}>
+          <input
+            type="text"
+            placeholder="Search project name"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ ...styles.textInput, backgroundColor: colors.surface, border: `1px solid ${colors.border}`, color: colors.text }}
+          />
+          <input
+            type="number"
+            placeholder="Min score"
+            value={minScore}
+            onChange={(e) => setMinScore(e.target.value)}
+            style={{ ...styles.textInput, maxWidth: "110px", backgroundColor: colors.surface, border: `1px solid ${colors.border}`, color: colors.text }}
+          />
+          <input
+            type="number"
+            placeholder="Max score"
+            value={maxScore}
+            onChange={(e) => setMaxScore(e.target.value)}
+            style={{ ...styles.textInput, maxWidth: "110px", backgroundColor: colors.surface, border: `1px solid ${colors.border}`, color: colors.text }}
+          />
+          <button onClick={fetchHistory} style={{ ...styles.primaryBtn, backgroundColor: colors.teal }}>Filter</button>
         </div>
-      ))}
+
+        {error && <p style={{ ...styles.errorText, color: colors.red }}>{error}</p>}
+        {history.length === 0 && !error && <p style={{ ...styles.mutedText, color: colors.muted }}>No reviews found.</p>}
+
+        {history.map((item) => (
+          <div key={item.review_id} style={{ ...styles.card, backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <h3 style={{ ...styles.projectName, color: colors.text }}>{item.project_name}</h3>
+              <span style={{ ...styles.scoreBadge, color: scoreColor(item.review_score) }}>{item.review_score}/100</span>
+            </div>
+            <p style={{ ...styles.mutedText, color: colors.muted }}>{item.summary}</p>
+            <p style={{ ...styles.timestamp, color: colors.muted }}>{new Date(item.created_at).toLocaleString()}</p>
+            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+              <Link
+                to={`/report?file=${encodeURIComponent(item.project_name)}`}
+                style={{ ...styles.viewBtn, borderColor: colors.amber, color: colors.amber }}
+              >
+                View Report →
+              </Link>
+              <button
+                onClick={() => handleDelete(item.review_id)}
+                style={{ ...styles.deleteBtn, color: colors.red, borderColor: colors.red }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-const cardStyle = {
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  padding: "16px",
-  marginTop: "16px",
-  backgroundColor: "#fafafa",
+const styles = {
+  content: { maxWidth: "720px", margin: "0 auto", padding: "50px 24px" },
+  filterRow: { display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "24px" },
+  textInput: {
+    padding: "10px", flex: 1, minWidth: "140px", borderRadius: "6px",
+    fontFamily: fonts.mono, fontSize: "13px",
+  },
+  primaryBtn: {
+    fontFamily: fonts.mono, padding: "10px 16px", color: "#0D1117",
+    border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600,
+  },
+  errorText: { fontSize: "14px" },
+  mutedText: { fontSize: "13px", margin: "6px 0" },
+  card: { borderRadius: "8px", padding: "18px", marginBottom: "14px" },
+  projectName: { margin: 0, fontSize: "15px", fontFamily: fonts.mono },
+  scoreBadge: { fontFamily: fonts.mono, fontSize: "13px", fontWeight: 600 },
+  timestamp: { fontSize: "11px", margin: "6px 0 0 0" },
+  viewBtn: {
+    fontFamily: fonts.mono, fontSize: "12px", padding: "6px 12px", border: "1px solid",
+    borderRadius: "6px", textDecoration: "none",
+  },
+  deleteBtn: {
+    fontFamily: fonts.mono, fontSize: "12px", padding: "6px 12px", backgroundColor: "transparent",
+    border: "1px solid", borderRadius: "6px", cursor: "pointer",
+  },
 };
 
 export default HistoryPage;

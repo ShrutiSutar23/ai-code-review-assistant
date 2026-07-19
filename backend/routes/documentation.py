@@ -1,6 +1,6 @@
 import os
 from flask import Blueprint, jsonify
-from services.documentation_service import generate_documentation
+from services.documentation_service import generate_documentation, generate_readme_summary
 
 documentation_bp = Blueprint("documentation", __name__)
 
@@ -22,3 +22,15 @@ def get_documentation(filename):
         "filename": filename,
         "documentation": doc_result
     }), 200
+
+@documentation_bp.route("/documentation/<filename>/readme", methods=["GET"])
+def get_readme_summary(filename):
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    if not os.path.exists(filepath):
+        return jsonify({"error": "File not found"}), 404
+
+    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+        code_content = f.read()
+
+    summary = generate_readme_summary(code_content, filename)
+    return jsonify({"filename": filename, "readme_summary": summary}), 200

@@ -6,20 +6,31 @@ import DocumentationPage from "./pages/DocumentationPage";
 import HistoryPage from "./pages/HistoryPage";
 import AuthPage from "./pages/AuthPage";
 import PasteCodePage from "./pages/PasteCodePage";
+import GithubUploadPage from "./pages/GithubUploadPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ProfilePage from "./pages/ProfilePage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { ThemeProvider } from "./context/ThemeContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/upload" element={<UploadPage />} />
-        <Route path="/report" element={<ReportPage />} />
-        <Route path="/documentation" element={<DocumentationPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/paste" element={<PasteCodePage />} />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/upload" element={<ProtectedRoute><UploadPage /></ProtectedRoute>} />
+          <Route path="/report" element={<ProtectedRoute><ReportPage /></ProtectedRoute>} />
+          <Route path="/documentation" element={<ProtectedRoute><DocumentationPage /></ProtectedRoute>} />
+          <Route path="/history" element={<ProtectedRoute><HistoryPage /></ProtectedRoute>} />
+          <Route path="/paste" element={<ProtectedRoute><PasteCodePage /></ProtectedRoute>} />
+          <Route path="/github" element={<ProtectedRoute><GithubUploadPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

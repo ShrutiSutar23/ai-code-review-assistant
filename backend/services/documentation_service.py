@@ -33,3 +33,20 @@ Code to document:
 
     except Exception as e:
         return {"error": str(e)}
+    
+def generate_readme_summary(code_content, filename):
+    prompt = f"""
+Write a short, professional README.md section (in Markdown format) describing this code file.
+Include: what it does, its main functions/classes, and example usage if obvious.
+Keep it concise (under 200 words).
+
+Filename: {filename}
+Code:
+{code_content}
+"""
+
+    try:
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        return f"Error generating README: {str(e)}"

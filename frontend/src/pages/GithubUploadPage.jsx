@@ -5,66 +5,66 @@ import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import PageHeader from "../components/PageHeader";
 
-function UploadPage() {
+function GithubUploadPage() {
   const { colors } = useTheme();
-  const [file, setFile] = useState(null);
+  const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
-  const [uploadedFilename, setUploadedFilename] = useState("");
+  const [saved, setSaved] = useState("");
   const [error, setError] = useState("");
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setMessage("");
-    setUploadedFilename("");
-  };
-
-  const handleUpload = async () => {
+  const handleSubmit = async () => {
     setError("");
-    if (!file) {
-      setError("Please choose a file first.");
+    setSaved("");
+    if (!url.trim()) {
+      setError("Please paste a GitHub file URL.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const response = await axios.post("http://127.0.0.1:5000/upload", formData);
+      const response = await axios.post("http://127.0.0.1:5000/upload/github", { url });
       setMessage(response.data.message);
-      setUploadedFilename(response.data.filename);
+      setSaved(response.data.filename);
     } catch (err) {
-      setError(err.response?.data?.error || "Upload failed.");
+      setError(err.response?.data?.error || "Failed to fetch file.");
     }
   };
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
       <div style={styles.content}>
-        <PageHeader eyebrow="~/upload" title="Upload Code" subtitle="Choose a source file from your machine to analyze." />
+        <PageHeader eyebrow="~/import" title="GitHub Import" subtitle="Paste a link to a single file on GitHub." />
 
         <div style={{ ...styles.card, backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}>
-          <input type="file" onChange={handleFileChange} style={{ ...styles.fileInput, color: colors.text }} />
-          <button
-            onClick={handleUpload}
-            style={{ ...styles.primaryBtn, backgroundColor: colors.teal }}
-          >
-            Upload
+          <input
+            type="text"
+            placeholder="https://github.com/user/repo/blob/main/file.py"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            style={{
+              ...styles.textInput,
+              backgroundColor: colors.bg,
+              border: `1px solid ${colors.border}`,
+              color: colors.text,
+            }}
+          />
+          <button onClick={handleSubmit} style={{ ...styles.primaryBtn, backgroundColor: colors.teal }}>
+            Fetch File
           </button>
 
           {error && <p style={{ ...styles.errorText, color: colors.red }}>{error}</p>}
 
-          {uploadedFilename && (
+          {saved && (
             <div style={{ ...styles.successBox, borderTop: `1px solid ${colors.border}` }}>
-              <p style={{ ...styles.successText, color: colors.green }}>✓ {message}</p>
+              <p style={{ ...styles.successText, color: colors.green }}>✓ {message} ({saved})</p>
               <div style={{ display: "flex", gap: "10px", marginTop: "14px", flexWrap: "wrap" }}>
                 <Link
-                  to={`/report?file=${encodeURIComponent(uploadedFilename)}`}
+                  to={`/report?file=${encodeURIComponent(saved)}`}
                   style={{ ...styles.actionBtn, borderColor: colors.amber, color: colors.amber }}
                 >
                   View Report →
                 </Link>
                 <Link
-                  to={`/documentation?file=${encodeURIComponent(uploadedFilename)}`}
+                  to={`/documentation?file=${encodeURIComponent(saved)}`}
                   style={{ ...styles.actionBtn, borderColor: colors.green, color: colors.green }}
                 >
                   Generate Documentation →
@@ -81,7 +81,10 @@ function UploadPage() {
 const styles = {
   content: { maxWidth: "640px", margin: "0 auto", padding: "50px 24px" },
   card: { borderRadius: "10px", padding: "24px" },
-  fileInput: { marginBottom: "16px", display: "block", fontFamily: fonts.sans, fontSize: "14px" },
+  textInput: {
+    padding: "10px", width: "100%", marginBottom: "14px", borderRadius: "6px",
+    fontFamily: fonts.mono, fontSize: "13px", boxSizing: "border-box",
+  },
   primaryBtn: {
     fontFamily: fonts.mono, padding: "10px 20px", color: "#0D1117",
     border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "13px", fontWeight: 600,
@@ -95,4 +98,4 @@ const styles = {
   },
 };
 
-export default UploadPage;
+export default GithubUploadPage;
