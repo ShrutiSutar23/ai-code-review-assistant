@@ -80,3 +80,12 @@ def upload_from_github():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@upload_bp.route("/files", methods=["GET"])
+def list_files():
+    try:
+        files = [f for f in os.listdir(UPLOAD_FOLDER) if is_allowed(f)]
+        files.sort(reverse=True)  # newest-ish first (alphabetical, but good enough)
+        return jsonify({"files": files}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

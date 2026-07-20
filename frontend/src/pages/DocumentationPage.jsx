@@ -13,6 +13,7 @@ function DocumentationPage() {
   const [readme, setReadme] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState([]);
 
   const fetchDocumentation = useCallback(async (fname) => {
     setError("");
@@ -50,15 +51,42 @@ function DocumentationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    axios.get("http://127.0.0.1:5000/files")
+      .then((res) => setFileList(res.data.files || []))
+      .catch(() => {});
+  }, []);
+
   return (
     <div style={{ minHeight: "100vh", backgroundColor: colors.bg, color: colors.text, fontFamily: fonts.sans }}>
       <div style={styles.content}>
         <PageHeader eyebrow="~/docs" title="Documentation Generator" subtitle="AI-generated docs for functions, classes, and modules." />
 
         <div style={styles.searchRow}>
+          <select
+            value=""
+            onChange={(e) => {
+              if (e.target.value) {
+                setFilename(e.target.value);
+                fetchDocumentation(e.target.value);
+              }
+            }}
+            style={{
+              ...styles.textInput,
+              maxWidth: "200px",
+              backgroundColor: colors.surface,
+              border: `1px solid ${colors.border}`,
+              color: colors.text,
+            }}
+          >
+            <option value="">📁 Choose a file...</option>
+            {fileList.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
           <input
             type="text"
-            placeholder="Enter filename (e.g. test.py)"
+            placeholder="Or type a filename"
             value={filename}
             onChange={(e) => setFilename(e.target.value)}
             style={{
@@ -75,6 +103,7 @@ function DocumentationPage() {
             README Summary
           </button>
         </div>
+
 
         {loading && <p style={{ ...styles.mutedText, color: colors.muted }}>Generating documentation...</p>}
         {error && <p style={{ ...styles.errorText, color: colors.red }}>{error}</p>}

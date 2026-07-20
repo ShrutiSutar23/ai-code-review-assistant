@@ -21,6 +21,7 @@ function ReportPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [fileList, setFileList] = useState([]);
 
   const fetchReport = useCallback(async (fname) => {
     setError("");
@@ -31,7 +32,10 @@ function ReportPage() {
     }
     setLoading(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/review/${fname}`);
+      const userEmail = localStorage.getItem("user_email") || "";
+      const response = await axios.get(`http://127.0.0.1:5000/review/${fname}`, {
+        headers: { "X-User-Email": userEmail }
+      });
       setReport(response.data);
       setActiveTab("overview");
     } catch (err) {
@@ -50,6 +54,12 @@ function ReportPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    axios.get("http://127.0.0.1:5000/files")
+      .then((res) => setFileList(res.data.files || []))
+      .catch(() => {});
+  }, []);
+
   const banditCount = report?.bandit?.issues?.length || 0;
   const pylintScore = report?.pylint?.score ?? "N/A";
   const aiScore = report?.ai_review?.quality_score ?? "N/A";
@@ -63,9 +73,24 @@ function ReportPage() {
         <PageHeader eyebrow="~/review" title="Code Analysis Report" subtitle="Pylint · Bandit · Radon · AI review, all in one place." />
 
         <div style={styles.searchRow}>
+          <select
+            value=""
+            onChange={(e) => {
+              if (e.target.value) {
+                setFilename(e.target.value);
+                fetchReport(e.target.value);
+              }
+            }}
+            style={{ ...styles.textInput, maxWidth: "220px", backgroundColor: colors.surface, border: `1px solid ${colors.border}`, color: colors.text }}
+          >
+            <option value="">📁 Choose a file...</option>
+            {fileList.map((f) => (
+              <option key={f} value={f}>{f}</option>
+            ))}
+          </select>
           <input
             type="text"
-            placeholder="Enter filename (e.g. test.py)"
+            placeholder="Or type a filename"
             value={filename}
             onChange={(e) => setFilename(e.target.value)}
             style={{ ...styles.textInput, backgroundColor: colors.surface, border: `1px solid ${colors.border}`, color: colors.text }}
@@ -93,7 +118,11 @@ function ReportPage() {
 
             {/* Summary strip */}
             <div style={styles.summaryGrid}>
-              <StatCard label="Pylint Score" value={`${pylintScore}/100`} color={scoreColor(pylintScore, colors)} />
+              <StatCard
+                label={report.language === "javascript" ? "ESLint Score" : report.language === "python" ? "Pylint Score" : "Static Analysis"}
+                value={pylintScore !== null && pylintScore !== undefined ? `${pylintScore}/100` : "N/A"}
+                color={scoreColor(pylintScore, colors)}
+              />
               <StatCard label="Security Issues" value={banditCount} color={banditCount > 0 ? colors.red : colors.green} />
               <StatCard label="Maintainability" value={maintainability ? `${maintainability.rank} (${maintainability.mi.toFixed(0)})` : "N/A"} color={colors.purple} />
               <StatCard label="AI Quality Score" value={`${aiScore}/100`} color={scoreColor(aiScore, colors)} />
@@ -176,13 +205,25 @@ function MiniStat({ label, value }) {
 function PylintTab({ report }) {
   const { colors } = useTheme();
   const issues = report.pylint?.issues || [];
+  const toolName = report.language === "javascript" ? "ESLint" : report.language === "python" ? "Pylint" : "Static Analysis";
+
+  if (report.pylint?.note) {
+    return <p style={{ ...styles.mutedText, color: colors.muted }}>{report.pylint.note}</p>;
+  }
+
   return (
     <div>
-      <p style={{ ...styles.scoreLine, color: colors.text }}><strong>Score:</strong> {report.pylint?.score ?? "N/A"} / 100</p>
+      <p style={{ ...styles.scoreLine, color: colors.text }}>
+        <strong>{toolName} Score:</strong> {report.pylint?.score ?? "N/A"} / 100
+      </p>
       {issues.length > 0 ? (
         <ul style={styles.list}>
           {issues.map((issue, i) => (
-            <li key={i} style={{ ...styles.listItem, color: colors.text }}>Line {issue.line}: {issue.message} ({issue["message-id"]})</li>
+            <li key={i} style={{ ...styles.listItem, color: colors.text }}>
+              Line {issue.line}: {issue.message}
+              {issue["message-id"] && ` (${issue["message-id"]})`}
+              {issue.rule && ` (${issue.rule})`}
+            </li>
           ))}
         </ul>
       ) : <p style={{ ...styles.mutedText, color: colors.muted }}>No issues found.</p>}
@@ -193,6 +234,10 @@ function PylintTab({ report }) {
 function SecurityTab({ report }) {
   const { colors } = useTheme();
   const issues = report.bandit?.issues || [];
+
+  if (report.bandit?.note && issues.length === 0) {
+    return <p style={{ color: colors.muted, fontSize: "13px" }}>{report.bandit.note}</p>;
+  }
   return (
     <div>
       {issues.length > 0 ? (
@@ -223,6 +268,22 @@ function ComplexityTab({ report }) {
   const { colors } = useTheme();
   const complexity = report.radon?.complexity || {};
   const maintainability = report.radon?.maintainability || {};
+
+  if (report.radon?.note) {
+    return (
+      <div>
+        <p style={{ color: colors.muted, fontSize: "13px", marginBottom: "16px" }}>{report.radon.note}</p>
+        <div style={styles.overviewGrid}>
+          <MiniStat label="Classes" value={report.metrics?.num_classes ?? "-"} />
+          <MiniStat label="Functions" value={report.metrics?.num_functions ?? "-"} />
+          <MiniStat label="Total Lines" value={report.metrics?.total_lines ?? "-"} />
+          <MiniStat label="Avg Function Length" value={report.metrics?.avg_function_length ?? "-"} />
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <div>
       {Object.keys(complexity).length > 0 ? (

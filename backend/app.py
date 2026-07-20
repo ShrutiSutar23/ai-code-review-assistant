@@ -7,6 +7,9 @@ from routes.documentation import documentation_bp
 from routes.history import history_bp
 from routes.auth import auth_bp
 from routes.export import export_bp
+from routes.refactor import refactor_bp
+from routes.compare import compare_bp
+
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB limit
@@ -18,6 +21,8 @@ app.register_blueprint(documentation_bp)
 app.register_blueprint(history_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(export_bp)
+app.register_blueprint(refactor_bp)
+app.register_blueprint(compare_bp)
 
 @app.route("/")
 def home():

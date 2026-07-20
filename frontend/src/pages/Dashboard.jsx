@@ -36,6 +36,9 @@ function Dashboard() {
     { cmd: "review", title: "View Report", desc: "Pylint · Bandit · Radon · AI review", to: "/report", accent: colors.amber },
     { cmd: "docs --gen", title: "Documentation", desc: "Auto-generate docs for functions & classes", to: "/documentation", accent: colors.green },
     { cmd: "log --history", title: "History", desc: "Search, filter, and revisit past reviews", to: "/history", accent: colors.red },
+    { cmd: "refactor --ai", title: "AI Refactor", desc: "See AI-rewritten code side-by-side", to: "/refactor", accent: colors.indigo },
+    { cmd: "analytics", title: "Analytics", desc: "Trends and charts across your reviews", to: "/analytics", accent: colors.blue },
+    { cmd: "compare", title: "Compare Files", desc: "See two files side-by-side with an AI verdict", to: "/compare", accent: colors.purple },
   ];
 
   const greeting = userName ? userName : "there";

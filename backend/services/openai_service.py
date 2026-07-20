@@ -46,3 +46,69 @@ Code to review:
 
     except Exception as e:
         return {"error": str(e)}
+    
+def generate_refactored_code(code_content, filename):
+    prompt = f"""
+You are an expert software engineer. Rewrite the following code to fix all bugs, security issues, and code smells, while preserving the original intent as closely as possible unless the original logic is clearly broken.
+
+Rules:
+- Return ONLY the corrected code itself.
+- Do NOT include any explanation, markdown formatting, backticks, or comments about what you changed.
+- Keep the same overall structure and function/class names where reasonable, unless renaming clearly improves clarity.
+- The output must be valid, runnable code in the same language as the input.
+
+Filename: {filename}
+
+Original code:
+{code_content}
+"""
+
+    try:
+        response = model.generate_content(prompt)
+        refactored = response.text.strip()
+
+        # Clean up in case the model wraps it in ``` fences anyway
+        if refactored.startswith("```"):
+            lines = refactored.split("\n")
+            lines = lines[1:] if lines[0].startswith("```") else lines
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            refactored = "\n".join(lines)
+
+        return refactored
+    except Exception as e:
+        return f"# Error generating refactored code: {str(e)}"
+    
+def compare_code_files(code_a, filename_a, code_b, filename_b):
+    prompt = f"""
+You are a senior software engineer comparing two code files.
+
+File 1: {filename_a}
+{code_a}
+
+File 2: {filename_b}
+{code_b}
+
+Compare these two files and return ONLY a valid JSON object with these exact keys:
+- similarity_summary: a short paragraph describing how similar or different the two files are overall
+- key_differences: list of strings describing the most important differences (logic, structure, quality)
+- which_is_better: one of "file1", "file2", or "similar", based on code quality
+- reasoning: a short explanation for the which_is_better choice
+- shared_patterns: list of strings describing anything the two files have in common (patterns, bugs, style)
+
+Do not add extra keys. Do not skip any key, even if empty (use "" or [] as appropriate).
+"""
+
+    try:
+        response = model.generate_content(prompt)
+        raw_output = response.text.strip()
+
+        if raw_output.startswith("```"):
+            raw_output = raw_output.strip("`")
+            raw_output = raw_output.replace("json", "", 1).strip()
+
+        result = json.loads(raw_output)
+        return result
+
+    except Exception as e:
+        return {"error": str(e)}
