@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 const TABS = [
@@ -17,11 +18,11 @@ function ReportPage() {
   const { colors } = useTheme();
   const [searchParams] = useSearchParams();
   const [filename, setFilename] = useState(searchParams.get("file") || "");
+  const [fileList, setFileList] = useState([]);
   const [report, setReport] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [fileList, setFileList] = useState([]);
 
   const fetchReport = useCallback(async (fname) => {
     setError("");
@@ -33,7 +34,7 @@ function ReportPage() {
     setLoading(true);
     try {
       const userEmail = localStorage.getItem("user_email") || "";
-      const response = await axios.get(`http://127.0.0.1:5000/review/${fname}`, {
+      const response = await axios.get(`${API_URL}/review/${fname}`, {
         headers: { "X-User-Email": userEmail }
       });
       setReport(response.data);
@@ -46,18 +47,18 @@ function ReportPage() {
   }, []);
 
   useEffect(() => {
+    axios.get(`${API_URL}/files`)
+      .then((res) => setFileList(res.data.files || []))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const fileParam = searchParams.get("file");
     if (fileParam) {
       setFilename(fileParam);
       fetchReport(fileParam);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    axios.get("http://127.0.0.1:5000/files")
-      .then((res) => setFileList(res.data.files || []))
-      .catch(() => {});
   }, []);
 
   const banditCount = report?.bandit?.issues?.length || 0;
@@ -110,13 +111,12 @@ function ReportPage() {
                 Results for: <span style={{ color: colors.teal }}>{report.filename}</span>
               </h2>
               <div style={{ display: "flex", gap: "8px" }}>
-                <a href={`http://127.0.0.1:5000/export/${report.filename}/pdf`} target="_blank" rel="noreferrer" style={{ ...styles.exportBtn, border: `1px solid ${colors.border}`, color: colors.muted, background: colors.surface }}>PDF</a>
-                <a href={`http://127.0.0.1:5000/export/${report.filename}/markdown`} target="_blank" rel="noreferrer" style={{ ...styles.exportBtn, border: `1px solid ${colors.border}`, color: colors.muted, background: colors.surface }}>Markdown</a>
-                <a href={`http://127.0.0.1:5000/export/${report.filename}/html`} target="_blank" rel="noreferrer" style={{ ...styles.exportBtn, border: `1px solid ${colors.border}`, color: colors.muted, background: colors.surface }}>HTML</a>
+                <a href={`${API_URL}/export/${report.filename}/pdf`} target="_blank" rel="noreferrer" style={{ ...styles.exportBtn, border: `1px solid ${colors.border}`, color: colors.muted, background: colors.surface }}>PDF</a>
+                <a href={`${API_URL}/export/${report.filename}/markdown`} target="_blank" rel="noreferrer" style={{ ...styles.exportBtn, border: `1px solid ${colors.border}`, color: colors.muted, background: colors.surface }}>Markdown</a>
+                <a href={`${API_URL}/export/${report.filename}/html`} target="_blank" rel="noreferrer" style={{ ...styles.exportBtn, border: `1px solid ${colors.border}`, color: colors.muted, background: colors.surface }}>HTML</a>
               </div>
             </div>
 
-            {/* Summary strip */}
             <div style={styles.summaryGrid}>
               <StatCard
                 label={report.language === "javascript" ? "ESLint Score" : report.language === "python" ? "Pylint Score" : "Static Analysis"}
@@ -128,7 +128,6 @@ function ReportPage() {
               <StatCard label="AI Quality Score" value={`${aiScore}/100`} color={scoreColor(aiScore, colors)} />
             </div>
 
-            {/* Tabs */}
             <div style={{ ...styles.tabBar, borderBottom: `1px solid ${colors.border}` }}>
               {TABS.map((tab) => (
                 <button
@@ -145,7 +144,6 @@ function ReportPage() {
               ))}
             </div>
 
-            {/* Tab content */}
             <div style={{ ...styles.tabContent, backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}>
               {activeTab === "overview" && <OverviewTab report={report} />}
               {activeTab === "pylint" && <PylintTab report={report} />}
@@ -238,6 +236,7 @@ function SecurityTab({ report }) {
   if (report.bandit?.note && issues.length === 0) {
     return <p style={{ color: colors.muted, fontSize: "13px" }}>{report.bandit.note}</p>;
   }
+
   return (
     <div>
       {issues.length > 0 ? (
@@ -282,7 +281,6 @@ function ComplexityTab({ report }) {
       </div>
     );
   }
-
 
   return (
     <div>

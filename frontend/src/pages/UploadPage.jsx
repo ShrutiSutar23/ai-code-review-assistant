@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function UploadPage() {
@@ -29,7 +30,7 @@ function UploadPage() {
     formData.append("file", file);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/upload", formData);
+      const response = await axios.post(`${API_URL}/upload`, formData);
       setMessage(response.data.message);
       setUploadedFilename(response.data.filename);
     } catch (err) {

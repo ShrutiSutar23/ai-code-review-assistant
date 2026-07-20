@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 
 function ProfilePage() {
   const { colors } = useTheme();
@@ -14,7 +15,7 @@ function ProfilePage() {
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/auth/profile", {
+    axios.get(`${API_URL}/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => {
@@ -29,7 +30,7 @@ function ProfilePage() {
     setMessage("");
     try {
       const response = await axios.put(
-        "http://127.0.0.1:5000/auth/profile",
+        `${API_URL}/auth/profile`,
         { name, email },
         { headers: { Authorization: `Bearer ${token}` } }
       );

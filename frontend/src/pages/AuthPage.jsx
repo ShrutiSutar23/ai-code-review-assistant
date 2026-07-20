@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 
 function AuthPage() {
   const { colors } = useTheme();
@@ -18,7 +19,7 @@ function AuthPage() {
     const endpoint = isRegister ? "/auth/register" : "/auth/login";
 
     try {
-      const response = await axios.post(`http://127.0.0.1:5000${endpoint}`, { email, password });
+      const response = await axios.post(`${API_URL}${endpoint}`, { email, password });
 
       if (isRegister) {
         setMessage("Registered! You can now log in.");
@@ -41,7 +42,7 @@ function AuthPage() {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/auth/forgot-password", { email });
+      const response = await axios.post(`${API_URL}/auth/forgot-password`, { email });
       setResetMessage(response.data.message);
     } catch (err) {
       setResetMessage(err.response?.data?.error || "Failed to send reset email.");
@@ -49,8 +50,8 @@ function AuthPage() {
   };
 
   const handleGithubLogin = () => {
-    const supabaseUrl = "https://iozlepmyruwsdoqlshob.supabase.co"; // e.g. https://xxxxx.supabase.co
-    const redirectTo = encodeURIComponent("http://localhost:3000/oauth-callback");
+    const supabaseUrl = "https://iozlepmyruwsdoqlshob.supabase.co";
+    const redirectTo = encodeURIComponent(`${window.location.origin}/oauth-callback`);
     window.location.href = `${supabaseUrl}/auth/v1/authorize?provider=github&redirect_to=${redirectTo}`;
   };
 

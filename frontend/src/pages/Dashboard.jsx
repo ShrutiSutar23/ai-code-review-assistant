@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ function Dashboard() {
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    axios.get("http://127.0.0.1:5000/auth/profile", {
+    axios.get(`${API_URL}/auth/profile`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then((res) => {
@@ -39,6 +40,7 @@ function Dashboard() {
     { cmd: "refactor --ai", title: "AI Refactor", desc: "See AI-rewritten code side-by-side", to: "/refactor", accent: colors.indigo },
     { cmd: "analytics", title: "Analytics", desc: "Trends and charts across your reviews", to: "/analytics", accent: colors.blue },
     { cmd: "compare", title: "Compare Files", desc: "See two files side-by-side with an AI verdict", to: "/compare", accent: colors.purple },
+    
   ];
 
   const greeting = userName ? userName : "there";
@@ -64,7 +66,6 @@ function Dashboard() {
         }
       `}</style>
 
-      {/* Title bar */}
       <div style={{ ...styles.titleBar, backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` }}>
         <div style={{ display: "flex", gap: "6px" }}>
           <span style={{ ...styles.dot, background: colors.red }} />
@@ -74,7 +75,6 @@ function Dashboard() {
         <span style={{ ...styles.titleBarText, color: colors.muted }}>ai-code-review-assistant — dashboard</span>
         <span style={{ ...styles.clock, color: colors.muted }}>{time.toLocaleTimeString()}</span>
 
-        {/* Profile + Theme + Logout, top-right corner */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "16px" }}>
           <Link to="/profile" className="avatar-link" style={styles.avatarLink} title="My Profile">
             <span

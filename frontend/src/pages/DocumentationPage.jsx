@@ -3,17 +3,18 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function DocumentationPage() {
   const { colors } = useTheme();
   const [searchParams] = useSearchParams();
   const [filename, setFilename] = useState(searchParams.get("file") || "");
+  const [fileList, setFileList] = useState([]);
   const [doc, setDoc] = useState(null);
   const [readme, setReadme] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [fileList, setFileList] = useState([]);
 
   const fetchDocumentation = useCallback(async (fname) => {
     setError("");
@@ -24,7 +25,7 @@ function DocumentationPage() {
     }
     setLoading(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/documentation/${fname}`);
+      const response = await axios.get(`${API_URL}/documentation/${fname}`);
       setDoc(response.data.documentation);
     } catch (err) {
       setError(err.response?.data?.error || "Something went wrong.");
@@ -35,12 +36,18 @@ function DocumentationPage() {
 
   const fetchReadme = async () => {
     try {
-      const res = await axios.get(`http://127.0.0.1:5000/documentation/${filename}/readme`);
+      const res = await axios.get(`${API_URL}/documentation/${filename}/readme`);
       setReadme(res.data.readme_summary);
     } catch (err) {
       setReadme("Failed to generate README summary.");
     }
   };
+
+  useEffect(() => {
+    axios.get(`${API_URL}/files`)
+      .then((res) => setFileList(res.data.files || []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const fileParam = searchParams.get("file");
@@ -49,12 +56,6 @@ function DocumentationPage() {
       fetchDocumentation(fileParam);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    axios.get("http://127.0.0.1:5000/files")
-      .then((res) => setFileList(res.data.files || []))
-      .catch(() => {});
   }, []);
 
   return (
@@ -103,7 +104,6 @@ function DocumentationPage() {
             README Summary
           </button>
         </div>
-
 
         {loading && <p style={{ ...styles.mutedText, color: colors.muted }}>Generating documentation...</p>}
         {error && <p style={{ ...styles.errorText, color: colors.red }}>{error}</p>}

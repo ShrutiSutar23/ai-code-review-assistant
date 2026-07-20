@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function GithubUploadPage() {
@@ -21,7 +22,7 @@ function GithubUploadPage() {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/upload/github", { url });
+      const response = await axios.post(`${API_URL}/upload/github`, { url });
       setMessage(response.data.message);
       setSaved(response.data.filename);
     } catch (err) {

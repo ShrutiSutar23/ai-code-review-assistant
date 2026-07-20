@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function AnalyticsPage() {
@@ -14,7 +15,7 @@ function AnalyticsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/analytics")
+    axios.get(`${API_URL}/analytics`)
       .then((res) => setData(res.data))
       .catch(() => setError("Could not load analytics."));
   }, []);
@@ -33,14 +34,12 @@ function AnalyticsPage() {
 
         {data && (
           <>
-            {/* Summary stats */}
             <div style={styles.statGrid}>
               <StatBox label="Total Reviews" value={data.total_reviews} colors={colors} />
               <StatBox label="Total Findings" value={data.total_findings} colors={colors} />
               <StatBox label="Average Score" value={`${data.avg_score}/100`} colors={colors} />
             </div>
 
-            {/* Score trend line chart */}
             <div style={{ ...styles.card, backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}>
               <h3 style={{ ...styles.cardTitle, color: colors.text }}>Score Trend Over Time</h3>
               {data.score_trend.length > 0 ? (
@@ -57,7 +56,6 @@ function AnalyticsPage() {
             </div>
 
             <div style={styles.twoColGrid}>
-              {/* Severity breakdown pie chart */}
               <div style={{ ...styles.card, backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}>
                 <h3 style={{ ...styles.cardTitle, color: colors.text }}>Findings by Severity</h3>
                 {data.severity_breakdown.some(d => d.value > 0) ? (
@@ -82,7 +80,6 @@ function AnalyticsPage() {
                 ) : <p style={{ color: colors.muted, fontSize: "13px" }}>No findings yet.</p>}
               </div>
 
-              {/* Issue type breakdown bar chart */}
               <div style={{ ...styles.card, backgroundColor: colors.surface, border: `1px solid ${colors.border}` }}>
                 <h3 style={{ ...styles.cardTitle, color: colors.text }}>Findings by Type</h3>
                 {data.issue_breakdown.length > 0 ? (

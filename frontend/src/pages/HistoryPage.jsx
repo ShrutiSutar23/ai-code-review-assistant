@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function HistoryPage() {
@@ -19,7 +20,7 @@ function HistoryPage() {
     if (minScore) params.min_score = minScore;
     if (maxScore) params.max_score = maxScore;
 
-    axios.get("http://127.0.0.1:5000/history", { params })
+    axios.get(`${API_URL}/history`, { params })
       .then((res) => setHistory(res.data.history))
       .catch(() => setError("Could not load history."));
   };
@@ -32,7 +33,7 @@ function HistoryPage() {
   const handleDelete = async (reviewId) => {
     if (!window.confirm("Delete this review?")) return;
     try {
-      await axios.delete(`http://127.0.0.1:5000/history/${reviewId}`);
+      await axios.delete(`${API_URL}/history/${reviewId}`);
       setHistory((prev) => prev.filter((item) => item.review_id !== reviewId));
     } catch (err) {
       alert("Failed to delete review.");

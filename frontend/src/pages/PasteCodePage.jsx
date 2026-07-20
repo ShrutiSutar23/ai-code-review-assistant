@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function PasteCodePage() {
@@ -23,7 +24,7 @@ function PasteCodePage() {
     }
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/upload/snippet", { code, filename });
+      const response = await axios.post(`${API_URL}/upload/snippet`, { code, filename });
       setMessage(response.data.message);
       setSaved(response.data.filename);
     } catch (err) {

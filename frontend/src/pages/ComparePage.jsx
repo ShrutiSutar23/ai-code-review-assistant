@@ -3,6 +3,7 @@ import axios from "axios";
 import { DiffEditor } from "@monaco-editor/react";
 import { fonts } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { API_URL } from "../apiConfig";
 import PageHeader from "../components/PageHeader";
 
 function ComparePage() {
@@ -15,7 +16,7 @@ function ComparePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:5000/files")
+    axios.get(`${API_URL}/files`)
       .then((res) => setFileList(res.data.files || []))
       .catch(() => {});
   }, []);
@@ -33,7 +34,7 @@ function ComparePage() {
     }
     setLoading(true);
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/compare/${fileA}/${fileB}`);
+      const response = await axios.get(`${API_URL}/compare/${fileA}/${fileB}`);
       setResult(response.data);
     } catch (err) {
       setError(err.response?.data?.error || "Something went wrong.");
