@@ -76,12 +76,15 @@ function Dashboard() {
         <span style={{ ...styles.clock, color: colors.muted }}>{time.toLocaleTimeString()}</span>
 
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "16px" }}>
-          <Link to="/profile" className="avatar-link" style={styles.avatarLink} title="My Profile">
+          <Link to="/profile" className="avatar-link" style={{ ...styles.avatarLink, display: "flex", alignItems: "center", gap: "8px" }} title="My Profile">
             <span
               className="avatar-circle"
               style={{ ...styles.avatarCircle, backgroundColor: colors.surfaceHover, border: `1px solid ${colors.border}`, color: colors.text }}
             >
               {initial}
+            </span>
+            <span style={{ fontFamily: fonts.mono, fontSize: "13px", color: colors.text }}>
+              {userName || "Set username"}
             </span>
           </Link>
           <button onClick={toggleTheme} style={{ ...styles.themeToggle, borderColor: colors.border, color: colors.text }}>
